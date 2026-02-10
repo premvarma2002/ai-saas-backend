@@ -2,6 +2,7 @@ import Auth from "../Schema/AuthSchema.js";
 import { errorHandler } from "../Utils/ErrorHandler.js";
 import { SuccessHandler } from "../Utils/SuccessHandler.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const register = async (req, res) => {
     try {
@@ -35,7 +36,7 @@ const register = async (req, res) => {
         });
     } catch (error) {
         console.log("this error from register user controller", error);
-        return errorHandler(res, error, 500, "Server error");
+        return errorHandler(res, error.message, 500, "Server error");
     }
 };
 
@@ -55,16 +56,35 @@ const login = async (req, res) => {
         if (!isMatch) {
             return errorHandler(res, {}, 400, "Invalid password");
         }
+
+        //jwt token can be generated here and sent to client for authentication in future requests
+
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+            expiresIn: "1h",
+        });
+
+        const refreshToken = jwt.sign(
+            { id: user._id },
+            process.env.JWT_SECRET,
+            { expiresIn: "7d" }
+        );
+
+        //add refresh token to user document in database for future validation
+        user.refreshToken = refreshToken;
+        await user.save();
+
         return SuccessHandler(res, 200, "User logged in successfully", {
             id: user._id,
             name: user.name,
             email: user.email,
             plan: user.plan,
             role: user.role,
+            token,
+            refreshToken,
         });
     } catch (error) {
-        return errorHandler(res, error, 500, "Server error");
-        console.log("this error from login user controller");
+        console.log("this error from login user controller", error);
+        return errorHandler(res, error.message, 500, "Server error");
     }
 };
 
