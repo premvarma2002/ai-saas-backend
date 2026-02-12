@@ -4,6 +4,7 @@ import { SuccessHandler } from "../Utils/SuccessHandler.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+//Register user
 const register = async (req, res) => {
     try {
         let { name, email, password } = req.body;
@@ -40,6 +41,7 @@ const register = async (req, res) => {
     }
 };
 
+//Login user
 const login = async (req, res) => {
     try {
         let { email, password } = req.body;
@@ -88,4 +90,76 @@ const login = async (req, res) => {
     }
 };
 
-export { register, login };
+//Refresh token (generate new access token using refresh token)
+const refreshToken = async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
+            return errorHandler(res, {}, 400, "Refresh token is required");
+        }
+        // Verify refresh token
+        const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+        const user = await Auth.findById(decoded.id);
+        if (!user || user.refreshToken !== refreshToken) {
+            return errorHandler(res, {}, 400, "Invalid refresh token");
+        }
+        // Generate new access token
+        const newToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+            expiresIn: "1h",
+        });
+        return SuccessHandler(res, 200, "Token refreshed successfully", {
+            token: newToken,
+        });
+    } catch (error) {
+        console.log("this error from refresh token controller", error);
+        return errorHandler(res, error.message, 500, "Server error");
+    }
+};
+
+//Forget password (reset password using email)
+const forgetPassword = async (req, res) => {
+    try {
+        const { email, newPassword } = req.body;
+        if (!email) {
+            return errorHandler(res, {}, 400, "Email is required");
+        }
+        const user = await Auth.findOne({ email });
+        if (!user) {
+            return errorHandler(res, {}, 400, "User not found");
+        }
+        // Hash new password
+        const salt = await bcrypt.genSalt(5);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        user.password = hashedPassword;
+        await user.save();
+        return SuccessHandler(res, 200, "Password reset successfully", {});
+    } catch (error) {
+        console.log("this error from forget password controller", error);
+        return errorHandler(res, error.message, 500, "Server error");
+    }
+};
+
+//Logout user (invalidate refresh token)
+const logout = async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
+            return errorHandler(res, {}, 400, "Refresh token is required");
+        }
+        // Verify refresh token
+        const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+        const user = await Auth.findById(decoded.id);
+        if (!user || user.refreshToken !== refreshToken) {
+            return errorHandler(res, {}, 400, "Invalid refresh token");
+        }
+        // Invalidate refresh token
+        user.refreshToken = null;
+        await user.save();
+        return SuccessHandler(res, 200, "User logged out successfully", {});
+    } catch (error) {
+        console.log("this error from logout user controller", error);
+        return errorHandler(res, error.message, 500, "Server error");
+    }
+};
+
+export { register, login, refreshToken, forgetPassword, logout };
