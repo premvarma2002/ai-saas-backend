@@ -1,0 +1,12 @@
+{
+  "variables": {
+    "MONGO_URI": {
+      "description": "MongoDB Connection String",
+      "value": "${{ secrets.MONGO_URI }}"
+    },
+    "JWT_SECRET": {
+      "description": "JWT Secret Key",
+      "value": "${{ secrets.JWT_SECRET }}"
+    }
+  }
+}
