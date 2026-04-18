@@ -1,0 +1,1616 @@
+{
+  "info": {
+    "_postman_id": "patternpilot-complete-api-v1",
+    "name": "PatternPilot Complete API - 40 Endpoints",
+    "description": "Complete API collection for PatternPilot AI-SaaS trading platform\n- 29 Node.js Backend Endpoints (Port 3001)\n- 11 Python Backend Endpoints (Port 3002)\n- JWT Authentication included",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Setup & Authentication",
+      "item": [
+        {
+          "name": "Register New User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test{{$timestamp}}@example.com\",\n  \"password\": \"Test@1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/auth/register",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Register a new user account"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Register returns 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('userId', json.data.id);",
+                  "pm.environment.set('testEmail', json.data.email);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login & Get Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"Test@1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/auth/login",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login to get JWT tokens"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login returns 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('accessToken', json.data.accessToken);",
+                  "pm.environment.set('refreshToken', json.data.refreshToken);",
+                  "pm.test('Token is valid', function () {",
+                  "    pm.expect(json.data.accessToken).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/auth/refresh-token",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh-token"
+              ]
+            },
+            "description": "Get a new access token using refresh token"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/auth/logout",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Logout and invalidate tokens"
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/auth/forget-password",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "forget-password"
+              ]
+            },
+            "description": "Request password reset email"
+          }
+        }
+      ]
+    },
+    {
+      "name": "User Management (6 APIs)",
+      "item": [
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/users/me",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me"
+              ]
+            },
+            "description": "Get authenticated user's profile"
+          }
+        },
+        {
+          "name": "Get User Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/users/stats",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "stats"
+              ]
+            },
+            "description": "Get user statistics"
+          }
+        },
+        {
+          "name": "Get Achievements",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/users/achievements",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "achievements"
+              ]
+            },
+            "description": "Get user achievements and badges"
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"avatarUrl\": \"https://example.com/avatar.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/users/profile",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "profile"
+              ]
+            },
+            "description": "Update user profile information"
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Test@1234\",\n  \"newPassword\": \"NewPassword@1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/users/change-password",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "change-password"
+              ]
+            },
+            "description": "Change user password"
+          }
+        },
+        {
+          "name": "Delete Account",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"confirmation\": \"DELETE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/users/account",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "account"
+              ]
+            },
+            "description": "Delete user account permanently"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Portfolio Management (6 APIs)",
+      "item": [
+        {
+          "name": "Get Portfolio Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/portfolio/summary",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "portfolio",
+                "summary"
+              ]
+            },
+            "description": "Get portfolio summary with total value and gains"
+          }
+        },
+        {
+          "name": "Get Portfolio Stocks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/portfolio/stocks",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "portfolio",
+                "stocks"
+              ]
+            },
+            "description": "Get all stocks in user's portfolio"
+          }
+        },
+        {
+          "name": "Add Stock to Portfolio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbol\": \"AAPL\",\n  \"shares\": 10,\n  \"avgCost\": 150.0,\n  \"purchaseDate\": \"2024-01-15\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/portfolio/stocks",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "portfolio",
+                "stocks"
+              ]
+            },
+            "description": "Add a new stock to portfolio"
+          }
+        },
+        {
+          "name": "Update Stock in Portfolio",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shares\": 15,\n  \"avgCost\": 155.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/portfolio/stocks/{{stockId}}",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "portfolio",
+                "stocks",
+                "{{stockId}}"
+              ]
+            },
+            "description": "Update stock quantity and average cost"
+          }
+        },
+        {
+          "name": "Delete Stock from Portfolio",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/portfolio/stocks/{{stockId}}",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "portfolio",
+                "stocks",
+                "{{stockId}}"
+              ]
+            },
+            "description": "Remove a stock from portfolio"
+          }
+        },
+        {
+          "name": "Clear Portfolio",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"confirmation\": \"CLEAR_ALL\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/portfolio/clear",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "portfolio",
+                "clear"
+              ]
+            },
+            "description": "Clear entire portfolio"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Stock Analytics (4 APIs)",
+      "item": [
+        {
+          "name": "Get Portfolio Performance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/stocks/performance?period=30d",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stocks",
+                "performance"
+              ],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            },
+            "description": "Get portfolio performance over time period"
+          }
+        },
+        {
+          "name": "Get Portfolio Allocation",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/stocks/allocation",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stocks",
+                "allocation"
+              ]
+            },
+            "description": "Get portfolio allocation by sector"
+          }
+        },
+        {
+          "name": "Get Top Performers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/stocks/top-performers?limit=5",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stocks",
+                "top-performers"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Get top performing stocks in portfolio"
+          }
+        },
+        {
+          "name": "Get Monthly Performance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/stocks/monthly-performance?year=2024",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stocks",
+                "monthly-performance"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2024"
+                }
+              ]
+            },
+            "description": "Get monthly performance breakdown"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alerts (8 APIs)",
+      "item": [
+        {
+          "name": "Get Alerts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/alerts?page=1&limit=20",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alerts"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get paginated list of alerts"
+          }
+        },
+        {
+          "name": "Get Alert Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/alerts/stats",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alerts",
+                "stats"
+              ]
+            },
+            "description": "Get alert statistics"
+          }
+        },
+        {
+          "name": "Mark Alert as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/alerts/{{alertId}}/read",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alerts",
+                "{{alertId}}",
+                "read"
+              ]
+            },
+            "description": "Mark specific alert as read"
+          }
+        },
+        {
+          "name": "Mark All Alerts as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/alerts/read-all",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alerts",
+                "read-all"
+              ]
+            },
+            "description": "Mark all alerts as read"
+          }
+        },
+        {
+          "name": "Delete Alert",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/alerts/{{alertId}}",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alerts",
+                "{{alertId}}"
+              ]
+            },
+            "description": "Delete an alert"
+          }
+        },
+        {
+          "name": "Get Alert Preferences",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/alerts/preferences",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alerts",
+                "preferences"
+              ]
+            },
+            "description": "Get user alert preferences"
+          }
+        },
+        {
+          "name": "Update Alert Preferences",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"priceAlerts\": true,\n  \"aiRecommendations\": false,\n  \"newsUpdates\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/alerts/preferences",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alerts",
+                "preferences"
+              ]
+            },
+            "description": "Update alert notification preferences"
+          }
+        },
+        {
+          "name": "Create Price Alert",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbol\": \"AAPL\",\n  \"targetPrice\": 180.0,\n  \"condition\": \"above\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/alerts/price-alert",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alerts",
+                "price-alert"
+              ]
+            },
+            "description": "Create a price alert for a stock"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Settings & Security (7 APIs)",
+      "item": [
+        {
+          "name": "Get Settings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/settings",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "settings"
+              ]
+            },
+            "description": "Get user settings"
+          }
+        },
+        {
+          "name": "Update Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"general\": {\n    \"language\": \"English\",\n    \"currency\": \"USD\",\n    \"timezone\": \"UTC+5:30\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/settings",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "settings"
+              ]
+            },
+            "description": "Update user settings"
+          }
+        },
+        {
+          "name": "Get Active Sessions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/settings/sessions",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "settings",
+                "sessions"
+              ]
+            },
+            "description": "Get all active user sessions"
+          }
+        },
+        {
+          "name": "Revoke Session",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/settings/sessions/{{sessionId}}",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "settings",
+                "sessions",
+                "{{sessionId}}"
+              ]
+            },
+            "description": "Revoke a specific session"
+          }
+        },
+        {
+          "name": "Enable 2FA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/settings/2fa/enable",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "settings",
+                "2fa",
+                "enable"
+              ]
+            },
+            "description": "Enable two-factor authentication"
+          }
+        },
+        {
+          "name": "Verify 2FA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/settings/2fa/verify",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "settings",
+                "2fa",
+                "verify"
+              ]
+            },
+            "description": "Verify and enable 2FA"
+          }
+        },
+        {
+          "name": "Disable 2FA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"current_password_here\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/settings/2fa/disable",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "settings",
+                "2fa",
+                "disable"
+              ]
+            },
+            "description": "Disable two-factor authentication"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Billing (4 APIs)",
+      "item": [
+        {
+          "name": "Get Subscription",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/billing/subscription",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "billing",
+                "subscription"
+              ]
+            },
+            "description": "Get user subscription details"
+          }
+        },
+        {
+          "name": "Get Billing History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/billing/history?page=1&limit=10",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "billing",
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get billing history"
+          }
+        },
+        {
+          "name": "Change Plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plan\": \"pro\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/billing/change-plan",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "billing",
+                "change-plan"
+              ]
+            },
+            "description": "Change subscription plan"
+          }
+        },
+        {
+          "name": "Cancel Subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{nodeBaseUrl}}/api/billing/cancel",
+              "host": [
+                "{{nodeBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "billing",
+                "cancel"
+              ]
+            },
+            "description": "Cancel subscription"
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Analysis (4 APIs)",
+      "item": [
+        {
+          "name": "Get Market Signals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{pythonBaseUrl}}/api/ai/market-signals",
+              "host": [
+                "{{pythonBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ai",
+                "market-signals"
+              ]
+            },
+            "description": "Get AI market signals (Bullish/Neutral/Bearish)"
+          }
+        },
+        {
+          "name": "Get Predictions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{pythonBaseUrl}}/api/ai/predictions?symbols=AAPL,GOOGL,MSFT",
+              "host": [
+                "{{pythonBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ai",
+                "predictions"
+              ],
+              "query": [
+                {
+                  "key": "symbols",
+                  "value": "AAPL,GOOGL,MSFT"
+                }
+              ]
+            },
+            "description": "Get AI predictions for stocks"
+          }
+        },
+        {
+          "name": "Get Analysis Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{pythonBaseUrl}}/api/ai/analysis-summary",
+              "host": [
+                "{{pythonBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ai",
+                "analysis-summary"
+              ]
+            },
+            "description": "Get AI market analysis summary"
+          }
+        },
+        {
+          "name": "Refresh Predictions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{pythonBaseUrl}}/api/ai/predictions/refresh",
+              "host": [
+                "{{pythonBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ai",
+                "predictions",
+                "refresh"
+              ]
+            },
+            "description": "Trigger prediction refresh job"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Market Data (3 APIs)",
+      "item": [
+        {
+          "name": "Get Stock Price",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{pythonBaseUrl}}/api/stocks/price?symbol=AAPL",
+              "host": [
+                "{{pythonBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stocks",
+                "price"
+              ],
+              "query": [
+                {
+                  "key": "symbol",
+                  "value": "AAPL"
+                }
+              ]
+            },
+            "description": "Get current stock price"
+          }
+        },
+        {
+          "name": "Get Candlestick Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{pythonBaseUrl}}/api/stocks/candlestick?symbol=AAPL&period=30d",
+              "host": [
+                "{{pythonBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stocks",
+                "candlestick"
+              ],
+              "query": [
+                {
+                  "key": "symbol",
+                  "value": "AAPL"
+                },
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            },
+            "description": "Get OHLCV candlestick data"
+          }
+        },
+        {
+          "name": "Get Price Comparison",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{pythonBaseUrl}}/api/stocks/comparison?symbols=AAPL,GOOGL,MSFT&period=30d",
+              "host": [
+                "{{pythonBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stocks",
+                "comparison"
+              ],
+              "query": [
+                {
+                  "key": "symbols",
+                  "value": "AAPL,GOOGL,MSFT"
+                },
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            },
+            "description": "Compare prices of multiple stocks"
+          }
+        }
+      ]
+    },
+    {
+      "name": "WebSocket Endpoints",
+      "item": [
+        {
+          "name": "Price Streaming WebSocket",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "ws://localhost:3002/ws/prices?symbols=AAPL,GOOGL&token={{accessToken}}",
+              "protocol": "ws",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "ws",
+                "prices"
+              ],
+              "query": [
+                {
+                  "key": "symbols",
+                  "value": "AAPL,GOOGL"
+                },
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}"
+                }
+              ]
+            },
+            "description": "WebSocket connection for real-time price streaming\n\nConnect with token as query parameter. Receives price updates every 30 seconds."
+          }
+        },
+        {
+          "name": "Alert Notifications WebSocket",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "ws://localhost:3002/ws/alerts?token={{accessToken}}",
+              "protocol": "ws",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "ws",
+                "alerts"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}"
+                }
+              ]
+            },
+            "description": "WebSocket connection for real-time alert notifications\n\nConnect with token as query parameter. Receives alert notifications as they occur."
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "nodeBaseUrl",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "pythonBaseUrl",
+      "value": "http://localhost:3002",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "stockId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "alertId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sessionId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
